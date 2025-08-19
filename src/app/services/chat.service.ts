@@ -35,15 +35,27 @@ export class ChatService {
 
   // Enviar mensaje con imagen
   async sendImageMessage(imageUrl: string, sender: string, message?: string): Promise<void> {
-    const chatMessage: ChatMessage = {
-      message: message || 'Imagen compartida',
-      sender,
-      timestamp: new Date(),
-      type: 'image',
-      imageUrl
-    };
-    
-    await addDoc(this.messagesCollection, chatMessage);
+    try {
+      const chatMessage: ChatMessage = {
+        message: message || 'Imagen compartida',
+        sender,
+        timestamp: new Date(),
+        type: 'image',
+        imageUrl
+      };
+      
+      console.log('Enviando mensaje de imagen:', {
+        sender,
+        message: chatMessage.message,
+        imageSize: imageUrl.length
+      });
+      
+      await addDoc(this.messagesCollection, chatMessage);
+      console.log('Mensaje de imagen enviado correctamente');
+    } catch (error) {
+      console.error('Error en sendImageMessage:', error);
+      throw error;
+    }
   }
 
   // Enviar ubicación

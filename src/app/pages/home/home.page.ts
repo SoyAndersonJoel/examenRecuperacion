@@ -175,22 +175,47 @@ export class HomePage implements OnInit, OnDestroy {
       const file = event.target.files[0];
       if (file) {
         const loading = await this.loadingController.create({
-          message: 'Subiendo imagen...'
+          message: 'Procesando imagen...'
         });
         await loading.present();
 
         try {
-          // Convertir imagen a base64 (para la versión gratuita de Firebase)
+          // Convertir imagen a base64
           const reader = new FileReader();
           reader.onload = async (e: any) => {
-            const imageUrl = e.target.result;
-            await this.chatService.sendImageMessage(imageUrl, this.currentUser);
-            loading.dismiss();
+            try {
+              const imageUrl = e.target.result;
+              
+              // Comprimir imagen para Firebase gratuito
+              const compressedImage = await this.compressImage(imageUrl);
+              
+              // Verificar tamaño para Firebase gratuito
+              if (compressedImage.length > 500000) { // 500KB límite
+                loading.dismiss();
+                this.showError('La imagen es demasiado grande para Firebase gratuito. Se comprimió pero sigue siendo muy grande.');
+                return;
+              }
+
+              await this.chatService.sendImageMessage(compressedImage, this.currentUser, 'Imagen seleccionada');
+              loading.dismiss();
+              this.showSuccess('Imagen enviada correctamente');
+            } catch (error: any) {
+              loading.dismiss();
+              console.error('Error al enviar imagen:', error);
+              this.showError('Error al enviar la imagen: ' + (error.message || 'Error desconocido'));
+            }
           };
+          
+          reader.onerror = () => {
+            loading.dismiss();
+            this.showError('Error al procesar la imagen');
+          };
+          
           reader.readAsDataURL(file);
-        } catch (error) {
+        } catch (error: any) {
           loading.dismiss();
-          this.showError('Error al subir la imagen');
+          console.error('Error al procesar imagen:', error);
+          this.showError('Error al procesar la imagen: ' + (error.message || 'Error desconocido'));
         }
       }
     };
@@ -200,48 +225,99 @@ export class HomePage implements OnInit, OnDestroy {
 
   async takePhoto() {
     try {
+      const loading = await this.loadingController.create({
+        message: 'Abriendo cámara...'
+      });
+      await loading.present();
+
       let photo;
       
-      // Verificar si estamos en un dispositivo móvil con Capacitor
-      if (Capacitor.isNativePlatform()) {
-        // Usar la cámara nativa en dispositivos móviles
-        photo = await Camera.getPhoto({
-          quality: 90,
-          allowEditing: false,
-          resultType: CameraResultType.DataUrl,
-          source: CameraSource.Camera,
-        });
-      } else {
-        // Usar la cámara web en navegadores
-        photo = await Camera.getPhoto({
-          quality: 90,
-          allowEditing: false,
-          resultType: CameraResultType.DataUrl,
-          source: CameraSource.Camera,
-          width: 300,
-          height: 300
-        });
-      }
+      // Configuración optimizada para Firebase gratuito
+      const cameraOptions = {
+        quality: 50, // Reducir calidad para menor tamaño
+        allowEditing: false,
+        resultType: CameraResultType.DataUrl,
+        source: CameraSource.Camera,
+        width: 400,  // Tamaño más pequeño
+        height: 400
+      };
+
+      photo = await Camera.getPhoto(cameraOptions);
+      loading.dismiss();
 
       if (photo && photo.dataUrl) {
-        const loading = await this.loadingController.create({
-          message: 'Enviando foto...'
+        const uploadLoading = await this.loadingController.create({
+          message: 'Procesando foto...'
         });
-        await loading.present();
+        await uploadLoading.present();
 
         try {
-          await this.chatService.sendImageMessage(photo.dataUrl, this.currentUser, 'Foto tomada');
-          loading.dismiss();
-        } catch (error) {
-          loading.dismiss();
-          this.showError('Error al enviar la foto');
+          // Comprimir imagen para Firebase gratuito
+          const compressedImage = await this.compressImage(photo.dataUrl);
+          
+          if (compressedImage.length > 500000) { // 500KB límite para Firebase gratuito
+            uploadLoading.dismiss();
+            this.showError('La imagen es demasiado grande para Firebase gratuito. Intenta con menos calidad.');
+            return;
+          }
+
+          await this.chatService.sendImageMessage(compressedImage, this.currentUser, 'Foto tomada');
+          uploadLoading.dismiss();
+          this.showSuccess('Foto enviada correctamente');
+        } catch (error: any) {
+          uploadLoading.dismiss();
+          console.error('Error al enviar foto:', error);
+          this.showError('Error al enviar la foto: ' + (error.message || 'Error desconocido'));
         }
+      } else {
+        this.showError('No se pudo obtener la imagen de la cámara');
       }
     } catch (error: any) {
+      console.error('Error al acceder a la cámara:', error);
       if (error.message !== 'User cancelled photos app') {
-        this.showError('Error al acceder a la cámara: ' + error.message);
+        this.showError('Error al acceder a la cámara: ' + (error.message || 'Error desconocido'));
       }
     }
+  }
+
+  // Función para comprimir imágenes para Firebase gratuito
+  private async compressImage(dataUrl: string): Promise<string> {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        // Redimensionar para Firebase gratuito
+        const maxWidth = 300;
+        const maxHeight = 300;
+        
+        let { width, height } = img;
+        
+        if (width > height) {
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = (width * maxHeight) / height;
+            height = maxHeight;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        // Comprimir con calidad baja para Firebase gratuito
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.3);
+        resolve(compressedDataUrl);
+      };
+      
+      img.src = dataUrl;
+    });
   }
 
   async shareLocation() {
@@ -258,10 +334,43 @@ export class HomePage implements OnInit, OnDestroy {
         this.currentUser
       );
       loading.dismiss();
-    } catch (error) {
+      this.showSuccess('Ubicación compartida exitosamente');
+    } catch (error: any) {
       loading.dismiss();
-      this.showError('Error al obtener la ubicación: ' + error);
+      
+      // Manejar diferentes tipos de errores
+      let errorMessage = error.message || error.toString();
+      
+      if (errorMessage.includes('denegado') || errorMessage.includes('denied')) {
+        this.showLocationPermissionError();
+      } else {
+        this.showError('Error al obtener la ubicación: ' + errorMessage);
+      }
     }
+  }
+
+  private async showLocationPermissionError() {
+    const alert = await this.alertController.create({
+      header: 'Permisos de Ubicación',
+      message: 'Para compartir tu ubicación, necesitas permitir el acceso:\n\n' +
+               '1. Busca el ícono 🔒 en la barra de direcciones\n' +
+               '2. Selecciona "Permitir" para ubicación\n' +
+               '3. Recarga la página si es necesario\n\n' +
+               'También puedes ir a Configuración → Privacidad → Ubicación',
+      buttons: [
+        {
+          text: 'Entendido',
+          role: 'cancel'
+        },
+        {
+          text: 'Intentar de nuevo',
+          handler: () => {
+            setTimeout(() => this.shareLocation(), 1000);
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   async presentOptionsActionSheet() {
