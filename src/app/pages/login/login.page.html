@@ -1,0 +1,62 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Iniciar Sesión</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="login-container">
+    <div class="logo-section">
+      <ion-icon name="chatbubbles" size="large" color="primary"></ion-icon>
+      <h1>Chat App</h1>
+    </div>
+
+    <form (ngSubmit)="login()" #loginForm="ngForm">
+      <ion-item>
+        <ion-label position="floating">Email</ion-label>
+        <ion-input 
+          type="email" 
+          [(ngModel)]="email" 
+          name="email" 
+          required 
+          email>
+        </ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="floating">Contraseña</ion-label>
+        <ion-input 
+          type="password" 
+          [(ngModel)]="password" 
+          name="password" 
+          required 
+          minlength="6">
+        </ion-input>
+      </ion-item>
+
+      <ion-button 
+        expand="block" 
+        type="submit" 
+        [disabled]="!loginForm.form.valid || isLoading"
+        class="login-button">
+        <ion-spinner name="crescent" *ngIf="isLoading"></ion-spinner>
+        <span *ngIf="!isLoading">Iniciar Sesión</span>
+      </ion-button>
+    </form>
+
+    <div class="register-link">
+      <p>¿No tienes cuenta? 
+        <ion-button fill="clear" color="primary" (click)="goToRegister()">
+          Regístrate aquí
+        </ion-button>
+      </p>
+    </div>
+
+    <!-- Mostrar errores -->
+    <ion-item *ngIf="errorMessage" lines="none">
+      <ion-label color="danger">
+        <p>{{ errorMessage }}</p>
+      </ion-label>
+    </ion-item>
+  </div>
+</ion-content>

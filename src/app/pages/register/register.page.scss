@@ -1,0 +1,36 @@
+.register-container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.logo-section {
+  text-align: center;
+  margin-bottom: 3rem;
+  
+  ion-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+  }
+  
+  h1 {
+    color: var(--ion-color-primary);
+    margin: 0;
+    font-weight: bold;
+  }
+}
+
+.register-button {
+  margin-top: 2rem;
+  --border-radius: 8px;
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 2rem;
+  
+  p {
+    margin: 0;
+    color: var(--ion-color-medium);
+  }
+}

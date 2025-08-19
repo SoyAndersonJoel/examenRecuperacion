@@ -1,0 +1,104 @@
+.messages-container {
+  height: calc(100% - 80px);
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.message-wrapper {
+  margin-bottom: 1rem;
+  display: flex;
+  
+  &.my-message {
+    justify-content: flex-end;
+    
+    .message-bubble {
+      background: var(--ion-color-primary);
+      color: white;
+      max-width: 80%;
+    }
+  }
+  
+  &.other-message {
+    justify-content: flex-start;
+    
+    .message-bubble {
+      background: var(--ion-color-light);
+      color: var(--ion-color-dark);
+      max-width: 80%;
+    }
+  }
+}
+
+.message-bubble {
+  border-radius: 18px;
+  padding: 12px 16px;
+  word-wrap: break-word;
+}
+
+.message-content {
+  p {
+    margin: 0;
+    line-height: 1.4;
+  }
+}
+
+.message-image {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.location-message {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  
+  ion-icon {
+    margin-bottom: 4px;
+  }
+  
+  ion-button {
+    margin-top: 8px;
+    --padding-start: 0;
+    --padding-end: 0;
+  }
+}
+
+.message-info {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  opacity: 0.7;
+  
+  .sender {
+    font-weight: 500;
+  }
+  
+  .timestamp {
+    margin-left: 8px;
+  }
+}
+
+.message-input-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid var(--ion-color-light);
+  padding: 8px;
+  
+  ion-item {
+    --background: transparent;
+    --border-color: transparent;
+  }
+  
+  ion-textarea {
+    max-height: 100px;
+  }
+}

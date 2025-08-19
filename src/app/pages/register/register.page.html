@@ -1,0 +1,83 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/login"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Crear Cuenta</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="register-container">
+    <div class="logo-section">
+      <ion-icon name="person-add" size="large" color="primary"></ion-icon>
+      <h1>Únete a Chat App</h1>
+    </div>
+
+    <form (ngSubmit)="register()" #registerForm="ngForm">
+      <ion-item>
+        <ion-label position="floating">Email</ion-label>
+        <ion-input 
+          type="email" 
+          [(ngModel)]="email" 
+          name="email" 
+          required 
+          email>
+        </ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="floating">Contraseña</ion-label>
+        <ion-input 
+          type="password" 
+          [(ngModel)]="password" 
+          name="password" 
+          required 
+          minlength="6">
+        </ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="floating">Confirmar Contraseña</ion-label>
+        <ion-input 
+          type="password" 
+          [(ngModel)]="confirmPassword" 
+          name="confirmPassword" 
+          required 
+          minlength="6">
+        </ion-input>
+      </ion-item>
+
+      <ion-button 
+        expand="block" 
+        type="submit" 
+        [disabled]="!registerForm.form.valid || isLoading || password !== confirmPassword"
+        class="register-button">
+        <ion-spinner name="crescent" *ngIf="isLoading"></ion-spinner>
+        <span *ngIf="!isLoading">Crear Cuenta</span>
+      </ion-button>
+    </form>
+
+    <!-- Validación de contraseñas -->
+    <ion-item *ngIf="password && confirmPassword && password !== confirmPassword" lines="none">
+      <ion-label color="danger">
+        <p>Las contraseñas no coinciden</p>
+      </ion-label>
+    </ion-item>
+
+    <!-- Mostrar errores -->
+    <ion-item *ngIf="errorMessage" lines="none">
+      <ion-label color="danger">
+        <p>{{ errorMessage }}</p>
+      </ion-label>
+    </ion-item>
+
+    <div class="login-link">
+      <p>¿Ya tienes cuenta? 
+        <ion-button fill="clear" color="primary" (click)="goToLogin()">
+          Inicia sesión aquí
+        </ion-button>
+      </p>
+    </div>
+  </div>
+</ion-content>

@@ -1,0 +1,79 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Chat App</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="presentOptionsActionSheet()">
+        <ion-icon name="ellipsis-vertical"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- Lista de mensajes -->
+  <div class="messages-container" #messagesContainer>
+    <div 
+      *ngFor="let message of messages" 
+      class="message-wrapper"
+      [ngClass]="{'my-message': isMyMessage(message.sender), 'other-message': !isMyMessage(message.sender)}">
+      
+      <div class="message-bubble">
+        <!-- Mensaje de texto -->
+        <div *ngIf="message.type === 'text'" class="message-content">
+          <p>{{ message.message }}</p>
+        </div>
+
+        <!-- Mensaje con imagen -->
+        <div *ngIf="message.type === 'image'" class="message-content">
+          <img [src]="message.imageUrl" alt="Imagen" class="message-image" (click)="viewImage(message.imageUrl!)">
+          <p *ngIf="message.message !== 'Imagen compartida'">{{ message.message }}</p>
+        </div>
+
+        <!-- Mensaje de ubicación -->
+        <div *ngIf="message.type === 'location'" class="message-content location-message">
+          <ion-icon name="location" color="primary"></ion-icon>
+          <p>{{ message.message }}</p>
+          <ion-button 
+            size="small" 
+            fill="clear" 
+            (click)="openMap(message.latitude!, message.longitude!)">
+            Ver en mapa
+          </ion-button>
+        </div>
+
+        <div class="message-info">
+          <span class="sender">{{ message.sender }}</span>
+          <span class="timestamp">{{ formatTimestamp(message.timestamp) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input para escribir mensajes -->
+  <div class="message-input-container">
+    <ion-item>
+      <ion-textarea 
+        [(ngModel)]="newMessage" 
+        placeholder="Escribe un mensaje..."
+        rows="1"
+        auto-grow="true"
+        (keydown.enter)="sendMessage($event)">
+      </ion-textarea>
+      
+      <ion-button 
+        slot="end" 
+        fill="clear" 
+        (click)="presentAttachmentOptions()">
+        <ion-icon name="attach"></ion-icon>
+      </ion-button>
+      
+      <ion-button 
+        slot="end" 
+        fill="clear" 
+        (click)="sendMessage()"
+        [disabled]="!newMessage.trim()">
+        <ion-icon name="send"></ion-icon>
+      </ion-button>
+    </ion-item>
+  </div>
+</ion-content>
