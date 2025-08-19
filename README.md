@@ -68,3 +68,27 @@ En Android Studio: **Build → Build APK**
 
 Anderson Joel  
 GitHub: [@SoyAndersonJoel](https://github.com/SoyAndersonJoel)
+
+Login
+  	 
+![alt text](image.png)
+
+![alt text](image-1.png)
+
+Registro
+![![alt text](image-3.png)](image-2.png)
+![alt text](image-4.png)
+
+Chat
+![alt text](image-5.png)
+![alt text](image-6.png)
+
+
+Subir una foto
+![alt text](image-7.png)
+FIRESTORE
+Colecciones
+![alt text](image-8.png)
+
+Authentication
+![alt text](image-9.png)
